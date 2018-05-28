@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <style type="text/css">
+        .header span {
+            background: #009688;
+            margin-left: 30px;
+            padding: 10px;
+            color: #ffffff;
+        }
+
+        .header div {
+            border-bottom: solid 2px #009688;
+            margin-top: 8px;
+        }
+
+        .header button {
+            float: right;
+            margin-top: -5px;
+        }
+
+    </style>
+
+</head>
+<body style="padding: 10px">
+<div class="header">
+    <span>资费管理</span>
+    <div>
+    </div>
+</div>
+<form class="layui-form">
+    <input type="hidden" name="flag" value="charge">
+    <table class="layui-table">
+        <thead>
+        <th>ID</th>
+        <th>排序</th>
+        <th>标签名称</th>
+        <th>是否禁用</th>
+        </thead>
+        <tbody>
+        {volist name="data" id="charge"}
+        <tr>
+            <td>{$charge.id}</td>
+            <td><input type="text"   name="ords[{$charge.id}]" value="{$charge.ord}"></td>
+            <td><input class="layui-input"   name="titles[{$charge.id}]" type="text" value="{$charge.title}"></td>
+            <td><input lay-skin="primary"  name="status[{$charge.id}]"  type="checkbox" title="禁用" {$charge.status?'checked':""}></td>
+        </tr>
+        {/volist}
+        <tr>
+            <td></td>
+            <td><input type="text"   name="ords[{0}]" ></td>
+            <td><input class="layui-input"  name="titles[{0}]"  type="text" ></td>
+            <td><input lay-skin="primary"  name="status[{0}]"  type="checkbox" title="禁用" ></td>
+            <td>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<button class="layui-btn layui-btn-sm-xs" onclick="save()">保存</button>
+<script type="text/javascript">
+    layui.use(['layer', 'form'], function () {
+        form = layui.form;
+        layer = layui.layer;
+        $ = layui.jquery;
+    });
+
+   //保存
+    function save() {
+        $.post("/index.php/admins/labels/save",$('form').serialize(),function (res) {
+            if (res.code>0){
+                layer.alert(res.msg,{icon:2})
+            }else{
+                layer.alert(res.msg,{icon:1})
+                setTimeout(function () {
+                    window.location.reload();
+                },1000)
+            }
+        },'json')
+    }
+
+
+</script>
+
+</body>
+</html>

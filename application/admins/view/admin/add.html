@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <style type="text/css">
+
+
+    </style>
+</head>
+<body style="padding: 10px;">
+<form class="layui-form">
+    <input  type="hidden" name="id" value="{$data.item.id}">
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 用户名</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="username" value="{$data.item.username}" {$data.item.id>0?"readonly":""}>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 密码</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="pwd">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 角 色</label>
+        <div class="layui-input-inline">
+            <select name="gid">
+                <option value="0"></option>
+                {volist name="data.groups" id="ad_groups"}
+                <option value="{$ad_groups.gid}"   {$ad_groups.gid == $data.item.gid ? 'selected':''} >{$ad_groups.title}</option>
+                {/volist}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 真实姓名</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="truename" value="{$data.item.truename}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 状态</label>
+        <div class="layui-input-inline">
+            <input type="checkbox" lay-skin="primary" title="禁用" name="status" value="1"  {$data.item.status ? "checked":""}   >
+        </div>
+    </div>
+</form>
+
+<div class="layui-form-item">
+    <div class="layui-input-block">
+        <button class="layui-btn" onclick="saveAdmin()">保存</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    layui.use(['layer', 'form'], function () {
+        form = layui.form;
+        layer = layui.layer;
+        $ = layui.jquery;
+    });
+
+
+    function saveAdmin() {
+        var id=parseInt($('input[name="id"]').val());
+
+        var username = $.trim(($('input[name="username"]')).val());
+        var pwd = $.trim(($('input[name="pwd"]')).val());
+        var gid = $.trim(($('select[name="gid"]')).val());
+        var truename = $.trim(($('input[name="truename"]')).val());
+
+        if (username == "") {
+            layer.alert("请输入用户名", {icon: 2})
+            return;
+        }
+        if (isNaN(id)&&pwd == "") {
+            layer.alert("请输入密码", {icon: 2})
+            return;
+        }
+        if (truename == "") {
+            layer.alert("请输入真实姓名", {icon: 2})
+            return;
+        }
+        if (gid == 0) {
+            layer.alert("请输入选择角色", {icon: 2})
+            return;
+        }
+        $.post('/index.php/admins/Admin/save', $('form').serialize(), function (res) {
+            if (res.code > 0) {
+                layer.alert(res.msg, {icon: 2})
+            } else {
+                layer.alert(res.msg);
+                setTimeout(function () {
+                    window.parent.location.reload();
+                },1000)
+            }
+
+        }, 'json');
+
+    }
+
+</script>
+
+
+</body>
+</html>

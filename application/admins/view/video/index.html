@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <style type="text/css">
+        .header span {
+            background: #009688;
+            margin-left: 30px;
+            padding: 10px;
+            color: #ffffff;
+        }
+
+        .header div {
+            border-bottom: solid 2px #009688;
+            margin-top: 8px;
+        }
+        .header button{
+            float: right;margin-top: -5px;
+        }
+
+    </style>
+
+</head>
+<body style="padding: 10px">
+<div class="header">
+    <span>影片列表</span>
+    <button  class="layui-btn layui-btn-sm"  onclick="addVideo()"  >添加 </button>
+    <div>
+    </div>
+</div>
+<div class="layui-form-item" style="margin-top: 20px">
+    <div class="layui-input-inline">
+        <input type="text" class="layui-input" value="{$data.wd}" id="wd" placeholder="请输入影片标题搜索">
+    </div>
+    <button class="layui-btn layui-btn-primary"  onclick='search()'> <i class="layui-icon">&#xe615;</i> 搜索 </button>
+</div>
+<table class="layui-table">
+    <thead>
+    <th>ID</th>
+    <th>频道</th>
+    <th>资费</th>
+    <th>地区</th>
+    <th>名称</th>
+    <th>PV</th>
+    <th>评分</th>
+    <th>状态</th>
+    <th>添加时间</th>
+    <th>操作</th>
+    </thead>
+    <tbody>
+    {volist name="data.data.lists" id="list"}
+    <tr>
+        <td>{$list.id}</td>
+        <td>{:isset($data['labels'][$list['channel_id']])?$data['labels'][$list['channel_id']]['title']:''}</td>
+        <td>{:isset($data['labels'][$list['charge_id']])?$data['labels'][$list['charge_id']]['title']:''}</td>
+        <td>{:isset($data['labels'][$list['area_id']])?$data['labels'][$list['area_id']]['title']:''}</td>
+        <td>{$list.title}</td>
+        <td>{$list.pv}</td>
+        <td>{$list.score}</td>
+        <td>{$list.status==1?'<span style=" color: green">发布</span>':'<span style=" color: red">下线</span>'}</td>
+        <td>{$list.add_time}</td>
+        <td>
+            <button class="layui-btn layui-btn-xs"   onclick="addVideo({$list.id})">编辑</button>
+            <button class="layui-btn layui-btn-danger layui-btn-xs"  onclick="del({$list.id})">删除</button>
+        </td>
+    </tr>
+    {/volist}
+    </tbody>
+</table>
+
+<div id="pages">
+
+</div>
+
+<script type="text/javascript">
+    layui.use(['layer','laypage'],function () {
+        layer=layui.layer;
+        laypage=layui.laypage;
+        $=layui.jquery;
+
+        //执行一个laypage实例
+        laypage.render({
+            elem: 'pages' //注意，这里的 test1 是 ID，不用加 # 号
+            ,count:{$data.data.total} //数据总数，从服务端得到
+            ,limit:{$data.pageSize}
+            ,curr:{$data.page}
+            ,jump: function(obj, first){
+            //obj包含了当前分页的所有参数，比如：
+            if(!first){
+                search(obj.curr);
+                // window.location.href="?page="+obj.curr;
+            }}
+        });
+
+    });
+
+
+    function addVideo(id) {
+        layer.open({
+
+            type:2,
+            title:id>0?"编辑影片":"添加影片",
+            shade:0.3,
+            area:['480px','420px'],
+            content: '/index.php/admins/Video/add?id='+id
+        });
+    }
+    function del(id) {
+        layer.confirm('确定要删除么?',{
+            icon:3,
+            btn:['确定','取消']
+        },function () {
+            $.post('/index.php/admins/Video/delete',{'id':id},function (res) {
+                if (res.code>0){
+                    layer.alert(res.msg,{icon:2})
+                }else{
+                    layer.alert(res.msg)
+                    setTimeout(function () {
+                        window.location.reload();
+                    },1000)
+                }
+            },'json');
+        });
+    }
+    //搜索
+    function search(currpage) {
+        var wd= $.trim($('#wd').val());
+        var url='/index.php/admins/Video/index?page='+currpage;
+        if(wd){
+            url+="&wd="+wd;
+        }
+        window.location.href=url;
+
+    }
+
+
+
+</script>
+
+
+</body>
+</html>

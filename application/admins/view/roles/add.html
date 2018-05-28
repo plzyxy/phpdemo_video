@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns: xmlns: xmlns: xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>角色添加</title>
+
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <style type="text/css">
+
+
+    </style>
+</head>
+<body style="padding: 10px;">
+<form class="layui-form">
+    <input type="hidden" name="gid" value="{$roles.gid}">
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 角色名称</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="title" value="{$roles.title}" }>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"> 权限菜单</label>
+        {volist name="menus" id="menu_list"}
+        <hr>
+        <div class="layui-input-block">
+            <input type="checkbox" class="layui-input" title="{$menu_list.title}" name="menu[{$menu_list.mid}]"
+                   lay-skin="primary"  {:isset( $roles['rights'])&& $roles['rights'] &&in_array($menu_list.mid,$roles['rights'])?'checked':''}>
+            <hr>
+            {volist name="menu_list.children" id="menu_list_child" }
+            <input type="checkbox" name="menu[{$menu_list_child.mid}]" lay-skin="primary"
+                   title="{$menu_list_child.title}" {:isset( $roles['rights'])&& $roles['rights'] &&in_array($menu_list_child.mid,$roles['rights'])?'checked':''}>
+            {/volist}
+        </div>
+
+        {/volist}
+    </div>
+
+</form>
+
+<div class="layui-form-item">
+    <div class="layui-input-block">
+        <button class="layui-btn" onclick="saveRoles()">保存</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    layui.use(['layer', 'form'], function () {
+        form = layui.form;
+        layer = layui.layer;
+        $ = layui.jquery;
+    });
+
+
+    function saveRoles() {
+        var id = parseInt($('input[name="id"]').val());
+
+        var title = $.trim(($('input[name="title"]')).val());
+
+
+        if (title == "") {
+            layer.alert("请输入角色名", {icon: 2})
+            return;
+        }
+
+        $.post('/index.php/admins/Roles/save', $('form').serialize(), function (res) {
+            if (res.code > 0) {
+                layer.alert(res.msg, {icon: 2})
+            } else {
+                layer.alert(res.msg);
+                setTimeout(function () {
+                    window.parent.location.reload();
+                }, 1000)
+            }
+
+        }, 'json');
+
+    }
+
+</script>
+
+
+</body>
+</html>

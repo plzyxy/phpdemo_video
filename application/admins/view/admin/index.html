@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <script src="/static/plugins/layui/layui.js"></script>
+    <style type="text/css">
+        .header span {
+            background: #009688;
+            margin-left: 30px;
+            padding: 10px;
+            color: #ffffff;
+        }
+
+        .header div {
+            border-bottom: solid 2px #009688;
+            margin-top: 8px;
+        }
+        .header button{
+            float: right;margin-top: -5px;
+        }
+
+    </style>
+
+</head>
+<body style="padding: 10px">
+<div class="header">
+    <span>管理员列表页</span>
+    <button  class="layui-btn layui-btn-sm"  onclick="addAdmin()"  >添加 </button>
+    <div>
+    </div>
+</div>
+    <table class="layui-table">
+        <thead>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>真实姓名</th>
+        <th>角色</th>
+        <th>状态</th>
+        <th>时间</th>
+        <th>操作</th>
+        </thead>
+        <tbody>
+        {volist name="data.lists" id="list"}
+        <tr>
+            <td>{$list.id}</td>
+            <td>{$list.username}</td>
+            <td>{$list.truename}</td>
+            <td>{:isset($data['groups'][$list.gid])?$data['groups'][$list.gid]['title']:''}</td>
+            <td>{$list.status==0?'正常':'<span style=" color: red">禁用</span>'}</td>
+            <td>{$list.add_time}</td>
+            <td>
+                <button class="layui-btn layui-btn-xs"   onclick="addAdmin({$list.id})">编辑</button>
+                <button class="layui-btn layui-btn-danger layui-btn-xs"  onclick="del({$list.id})">删除</button>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+
+<script type="text/javascript">
+    layui.use(['layer'],function () {
+        layer=layui.layer;
+        $=layui.jquery;
+    });
+
+    
+    function addAdmin(id) {
+        layer.open({
+
+            type:2,
+            title:id>0?"编辑管理员":"添加管理员",
+            shade:0.3,
+            area:['480px','420px'],
+            content: '/index.php/admins/Admin/add?id='+id
+        });
+    }
+    function del(id) {
+        layer.confirm('确定要删除么?',{
+            btn:['确定','取消']
+        },function () {
+            $.post('/index.php/admins/Admin/delete',{'id':id},function (res) {
+               if (res.code>0){
+                   layer.alert(res.msg,{icon:2})
+               }else{
+                   layer.alert(res.msg)
+                   setTimeout(function () {
+                       window.parent.location.reload();
+                   },1000)
+               }
+            },'json');
+        });
+    }
+    
+    
+</script>
+
+
+</body>
+</html>
